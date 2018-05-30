@@ -2,6 +2,7 @@ import argparse
 import time
 import msgpack
 from enum import Enum, auto
+import re
 
 import numpy as np
 
@@ -119,16 +120,24 @@ class MotionPlanning(Drone):
 
         self.target_position[2] = TARGET_ALTITUDE
 
-        # TODO: read lat0, lon0 from colliders into floating point values
-        
-        # TODO: set home position to (lon0, lat0, 0)
+        # read lat0, lon0 from colliders into floating point values
+        # lat0 37.792480, lon0 -122.397450
 
-        # TODO: retrieve current global position
- 
-        # TODO: convert to current local position using global_to_local()
+        with open('colliders.csv') as f:
+            first_line = f.readline()
+            result = re.findall("[-+]?\d+\.\d+", first_line)
+            lat0 = float(result[0])
+            lon0 = float(result[1])
+
+        
+        self.set_home_position(lon0, lat0, 0)
+
+        # retrieve current global position
+        # convert to current local position using global_to_local()
+        current_local_pos = global_to_local(self.global_position, self.global_home)
         
         print('global home {0}, position {1}, local position {2}'.format(self.global_home, self.global_position,
-                                                                         self.local_position))
+                                                                         current_local_pos))
         # Read in obstacle map
         data = np.loadtxt('colliders.csv', delimiter=',', dtype='Float64', skiprows=2)
         
@@ -137,7 +146,9 @@ class MotionPlanning(Drone):
         print("North offset = {0}, east offset = {1}".format(north_offset, east_offset))
         # Define starting point on the grid (this is just grid center)
         grid_start = (-north_offset, -east_offset)
-        # TODO: convert start position to current position rather than map center
+        # convert start position to current position rather than map center
+        #grid_start = (current_local_pos[0], current_local_pos[1])
+        #grid_start = (0, 0)
         
         # Set goal as some arbitrary position on the grid
         grid_goal = (-north_offset + 10, -east_offset + 10)

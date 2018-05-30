@@ -1,4 +1,5 @@
 from enum import Enum
+from math import sqrt
 from queue import PriorityQueue
 import numpy as np
 
@@ -10,6 +11,7 @@ def create_grid(data, drone_altitude, safety_distance):
     arguments.
     """
 
+    # Format: posX,posY,posZ,halfSizeX,halfSizeY,halfSizeZ
     # minimum and maximum north coordinates
     north_min = np.floor(np.min(data[:, 0] - data[:, 3]))
     north_max = np.ceil(np.max(data[:, 0] + data[:, 3]))
@@ -55,6 +57,11 @@ class Action(Enum):
     EAST = (0, 1, 1)
     NORTH = (-1, 0, 1)
     SOUTH = (1, 0, 1)
+
+    NORTH_EAST = (-1, 1, sqrt(2))
+    NORTH_WEST = (-1, -1, sqrt(2))
+    SOUTH_EAST = (1, 1, sqrt(2))
+    SOUTH_WEST = (1, -1, sqrt(2))
 
     @property
     def cost(self):
