@@ -156,7 +156,7 @@ def bresenham(p1, p2):
     return np.array(cells)
 ```
 
-### Running motion planning
+### Running the code
 
 Drone can be sent to specific global longitude and altitude by giving following command:
 ```
