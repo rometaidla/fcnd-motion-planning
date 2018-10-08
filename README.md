@@ -10,7 +10,7 @@ After drone is armed (`ARMING` state), drone flight path is constructed (state `
 
 In position change callback, after drone is taken off (`TAKEOFF` state), drone is transitioned through planned waypoints (state `WAYPOINT`). 
 
-When goal endpoint is reached drone is landed (`LANDING`)and disarmed (`DISARMING`).
+When goal endpoint is reached drone is landed (`LANDING`) and disarmed (`DISARMING`).
 
 In `planning_utils.py` grid representation is constructed using given obstacle data. A* search implemented is provided without waypoint pruning. 
 
