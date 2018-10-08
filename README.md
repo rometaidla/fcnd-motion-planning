@@ -76,8 +76,7 @@ if x - 1 < 0 or y - 1 < 0 or grid[x - 1, y - 1] == 1:
 ```
 
 #### 6. Cull waypoints 
-My implementation go over all points found in path done by A* and constracts all points using bresenham method and
-checks whether there is some collision. 
+My implementation goes over all points found in path done by A* and constracts all points between 2 points in path using bresenham method and checks whether there is some collision. 
 
 If there is there is collision, point is added to list of pruned path points.
 If there is there is no collision next point is considered for collisions.
