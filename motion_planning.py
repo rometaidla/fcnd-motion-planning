@@ -6,7 +6,7 @@ import re
 
 import numpy as np
 
-from planning_utils import a_star, heuristic, create_grid
+from planning_utils import a_star, heuristic, create_grid, prune_path
 from udacidrone import Drone
 from udacidrone.connection import MavlinkConnection
 from udacidrone.messaging import MsgID
@@ -25,10 +25,11 @@ class States(Enum):
 
 class MotionPlanning(Drone):
 
-    def __init__(self, connection):
+    def __init__(self, connection, target_position_global=None):
         super().__init__(connection)
 
         self.target_position = np.array([0.0, 0.0, 0.0])
+        self.target_position_global = target_position_global
         self.waypoints = []
         self.in_mission = True
         self.check_state = {}
@@ -145,22 +146,21 @@ class MotionPlanning(Drone):
         grid, north_offset, east_offset = create_grid(data, TARGET_ALTITUDE, SAFETY_DISTANCE)
         print("North offset = {0}, east offset = {1}".format(north_offset, east_offset))
         # Define starting point on the grid (this is just grid center)
-        grid_start = (-north_offset, -east_offset)
         # convert start position to current position rather than map center
-        #grid_start = (current_local_pos[0], current_local_pos[1])
-        #grid_start = (0, 0)
-        
+        grid_start = (int(np.ceil(current_local_pos[0] - north_offset)), int(np.ceil(int(current_local_pos[1]) - east_offset)))
+
         # Set goal as some arbitrary position on the grid
-        grid_goal = (-north_offset + 10, -east_offset + 10)
+        goal_north, goal_east, goal_alt = global_to_local(self.target_position_global, self.global_home)
+        grid_goal = (int(np.ceil(goal_north - north_offset)), int(np.ceil(goal_east - east_offset)))
+        #grid_goal = (-north_offset+375, -east_offset+465)
         # TODO: adapt to set goal as latitude / longitude position and convert
 
         # Run A* to find a path from start to goal
-        # TODO: add diagonal motions with a cost of sqrt(2) to your A* implementation
-        # or move to a different search space such as a graph (not done here)
         print('Local Start and Goal: ', grid_start, grid_goal)
         path, _ = a_star(grid, heuristic, grid_start, grid_goal)
         # TODO: prune path to minimize number of waypoints
         # TODO (if you're feeling ambitious): Try a different approach altogether!
+        path = prune_path(path, grid)
 
         # Convert path to waypoints
         waypoints = [[p[0] + north_offset, p[1] + east_offset, TARGET_ALTITUDE, 0] for p in path]
@@ -186,10 +186,14 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--port', type=int, default=5760, help='Port number')
     parser.add_argument('--host', type=str, default='127.0.0.1', help="host address, i.e. '127.0.0.1'")
+    parser.add_argument('--goal_global_lon', type=str, help="global goal longitude, i.e. '-122.39'")
+    parser.add_argument('--goal_global_lat', type=str, help="global goal latitude, i.e. '37.79'")
+    parser.add_argument('--goal_global_alt', type=str, help="global goal altitude, i.e. '5.09'")
     args = parser.parse_args()
 
+    target_position_global = np.fromstring(f'{args.goal_global_lon},{args.goal_global_lat},{args.goal_global_alt}', dtype='Float64', sep=',')
     conn = MavlinkConnection('tcp:{0}:{1}'.format(args.host, args.port), timeout=60)
-    drone = MotionPlanning(conn)
+    drone = MotionPlanning(conn, target_position_global=target_position_global)
     time.sleep(1)
 
     drone.start()

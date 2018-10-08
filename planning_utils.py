@@ -91,8 +91,81 @@ def valid_actions(grid, current_node):
         valid_actions.remove(Action.WEST)
     if y + 1 > m or grid[x, y + 1] == 1:
         valid_actions.remove(Action.EAST)
+    if x - 1 < 0 or y + 1 > m or grid[x - 1, y + 1] == 1:
+        valid_actions.remove(Action.NORTH_EAST)
+    if x + 1 > n or y + 1 > m or grid[x + 1, y + 1] == 1:
+        valid_actions.remove(Action.SOUTH_EAST)
+    if x + 1 > n or y - 1 < 0 or grid[x + 1, y - 1] == 1:
+        valid_actions.remove(Action.SOUTH_WEST)
+    if x - 1 < 0 or y - 1 < 0 or grid[x - 1, y - 1] == 1:
+        valid_actions.remove(Action.NORTH_WEST)
 
     return valid_actions
+
+def prune_path(path, grid):
+
+    pruned_path = []
+    start_point = path[0]
+    pruned_path.append(start_point)
+
+    for end_point in path[1:]:
+        points = bresenham(start_point, end_point)
+
+        if any(grid[pl[0], pl[1]] == 1 for pl in points):
+            start_point = end_point
+            pruned_path.append(end_point)
+
+    end_point = path[-1]
+    pruned_path.append(end_point)
+
+    return pruned_path
+
+def bresenham(p1, p2):
+    x1, y1 = p1
+    x2, y2 = p2
+    cells = []
+
+    i = x1
+    j = y1
+    d = 0
+
+    if x2 > x1:
+        i_diff = 1
+        i_pred = lambda i: i < x2
+        i_index = lambda i: i
+        dx = x2 - x1
+    else:
+        i_diff = -1
+        i_pred = lambda i: i > x2
+        i_index = lambda i: i - 1
+        dx = x1 - x2
+
+    if y2 > y1:
+        j_diff = 1
+        j_pred = lambda j: j < y2
+        j_index = lambda j: j
+        dy = y2 - y1
+    else:
+        j_diff = -1
+        j_pred = lambda j: j > y2
+        j_index = lambda j: j - 1
+        dy = y1 - y2
+
+    while i_pred(i) and j_pred(j):
+        cells.append([i_index(i), j_index(j)])
+        if d < dx - dy:
+            d += dy
+            i += i_diff
+        elif d == dx - dy:
+            d += dy
+            i += i_diff
+            d -= dx
+            j += j_diff
+        else:
+            d -= dx
+            j += j_diff
+
+    return np.array(cells)
 
 
 def a_star(grid, h, start, goal):
@@ -146,8 +219,5 @@ def a_star(grid, h, start, goal):
         print('**********************') 
     return path[::-1], path_cost
 
-
-
 def heuristic(position, goal_position):
     return np.linalg.norm(np.array(position) - np.array(goal_position))
-
