@@ -22,13 +22,13 @@ Longitude and latitue is extracted from *colliders.csv* first line. This can be 
 
 ```python
 with open('colliders.csv') as f:
-            first_line = f.readline()
-            result = re.findall("[-+]?\d+\.\d+", first_line)
-            lat0 = float(result[0])
-            lon0 = float(result[1])
+    first_line = f.readline()
+    result = re.findall("[-+]?\d+\.\d+", first_line)
+    lat0 = float(result[0])
+    lon0 = float(result[1])
 
-            # TODO: set home position to (lon0, lat0, 0)
-            self.set_home_position(lon0, lat0, 0)
+    # Set home position to (lon0, lat0, 0)
+    self.set_home_position(lon0, lat0, 0)
 ```
 
 #### 2. Set your current local position
