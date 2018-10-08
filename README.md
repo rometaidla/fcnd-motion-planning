@@ -76,10 +76,10 @@ if x - 1 < 0 or y - 1 < 0 or grid[x - 1, y - 1] == 1:
 ```
 
 #### 6. Cull waypoints 
-My implementation goes over all points found in path done by A* and constracts all points between 2 points in path using bresenham method and checks whether there is some collision. 
+My implementation starts going over all point pairs, starting with start point and goes over all points pairs found in path done by A*. It finds all points between these 2 points using bresenham method and checks whether there is some collision. 
 
-If there is there is collision, point is added to list of pruned path points.
-If there is there is no collision next point is considered for collisions.
+If there is there is collision, point is added to list of path points.
+If there is there is no collision next point is considered for collisions, hence current point is pruned.
 
 Code for this can be found in `planning_utils.py` method `prune_path` on lines 105-109:
 
