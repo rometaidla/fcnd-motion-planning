@@ -129,6 +129,7 @@ def bresenham(p1, p2):
     j = y1
     d = 0
 
+    # To support bresenham in every direction, lets set different parameters depending which direction is the line
     if x2 > x1:
         i_diff = 1
         i_pred = lambda i: i < x2

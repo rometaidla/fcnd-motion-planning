@@ -150,23 +150,20 @@ class MotionPlanning(Drone):
         grid_start = (int(np.ceil(current_local_pos[0] - north_offset)), int(np.ceil(int(current_local_pos[1]) - east_offset)))
 
         # Set goal as some arbitrary position on the grid
+        # Adapt to set goal as latitude / longitude position and convert
         goal_north, goal_east, goal_alt = global_to_local(self.target_position_global, self.global_home)
         grid_goal = (int(np.ceil(goal_north - north_offset)), int(np.ceil(goal_east - east_offset)))
-        #grid_goal = (-north_offset+375, -east_offset+465)
-        # TODO: adapt to set goal as latitude / longitude position and convert
 
         # Run A* to find a path from start to goal
         print('Local Start and Goal: ', grid_start, grid_goal)
         path, _ = a_star(grid, heuristic, grid_start, grid_goal)
-        # TODO: prune path to minimize number of waypoints
-        # TODO (if you're feeling ambitious): Try a different approach altogether!
+        # Prune path to minimize number of waypoints
         path = prune_path(path, grid)
 
         # Convert path to waypoints
         waypoints = [[p[0] + north_offset, p[1] + east_offset, TARGET_ALTITUDE, 0] for p in path]
         # Set self.waypoints
         self.waypoints = waypoints
-        # TODO: send waypoints to sim (this is just for visualization of waypoints)
         self.send_waypoints()
 
     def start(self):
@@ -188,7 +185,7 @@ if __name__ == "__main__":
     parser.add_argument('--host', type=str, default='127.0.0.1', help="host address, i.e. '127.0.0.1'")
     parser.add_argument('--goal_global_lon', type=str, help="global goal longitude, i.e. '-122.39'")
     parser.add_argument('--goal_global_lat', type=str, help="global goal latitude, i.e. '37.79'")
-    parser.add_argument('--goal_global_alt', type=str, help="global goal altitude, i.e. '5.09'")
+    parser.add_argument('--goal_global_alt', default='5.00', type=str, help="global goal altitude, i.e. '5.09'")
     args = parser.parse_args()
 
     target_position_global = np.fromstring(f'{args.goal_global_lon},{args.goal_global_lat},{args.goal_global_alt}', dtype='Float64', sep=',')
